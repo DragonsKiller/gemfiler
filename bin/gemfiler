@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'colorize'
+require "thor"
+Dir['../lib/*.rb'].each {|f| require_relative(f)}
+
+class Gemfiler
+  attr_accessor :gem_name, :gem_version
+
+  def initialize(gem_name, gem_version)
+    @gem_name = gem_name
+    @gem_version = gem_version 
+  end
+end
+
+begin
+  gem1= Gemfiler.new(*ARGV)
+  versions = VersionFetcher.new(gem1.gem_name).fetch
+  if versions
+    filter_versions = VersionFilter.new(versions,gem1.gem_version.dup).filter
+    Visualizer.new(versions,filter_versions).write if filter_versions
+  end
+rescue ArgumentError
+  puts "Error. Write only gem name and version".red
+end
+
+
